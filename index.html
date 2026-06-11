@@ -19,7 +19,14 @@
   .progress-track { height: 5px; background: #e0e0e0; border-radius: 3px; }
   .progress-fill { height: 5px; background: #1D9E75; border-radius: 3px; transition: width 0.3s; }
   .section { margin-bottom: 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; overflow: hidden; }
-  .section-title { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; padding: 12px 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; gap: 12px; }
+  .section-title { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; }
+  .section-all-btns { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+  .section-all-label { font-size: 11px; color: #aaa; margin-right: 2px; }
+  .section-all-btns button { height: 28px; padding: 0 10px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #888; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+  .section-all-btns button.all-yes { background: #EAF3DE; border-color: #639922; color: #3B6D11; }
+  .section-all-btns button.all-no { background: #FCEBEB; border-color: #E24B4A; color: #A32D2D; }
+  .section-all-btns button:active { transform: scale(0.95); }
   .question { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #f5f5f5; }
   .question:last-child { border-bottom: none; }
   .question.sub { background: #fafafa; padding-left: 28px; }
@@ -213,16 +220,33 @@ function setAnswer(id, val) {
   updateProgress();
 }
 
+function setAllInSection(sectionIndex, val) {
+  const section = SECTIONS[sectionIndex];
+  section.questions.forEach(q => setAnswer(q.id, val));
+  const yAllBtn = document.getElementById('all-yes-' + sectionIndex);
+  const nAllBtn = document.getElementById('all-no-' + sectionIndex);
+  yAllBtn.className = val === 'Yes' ? 'all-yes' : '';
+  nAllBtn.className = val === 'No' ? 'all-no' : '';
+}
+
 function buildUI() {
   totalQ = countTotal();
   const container = document.getElementById('questions-container');
-  SECTIONS.forEach(section => {
+  SECTIONS.forEach((section, si) => {
     const sec = document.createElement('div');
     sec.className = 'section';
-    const titleEl = document.createElement('div');
-    titleEl.className = 'section-title';
-    titleEl.textContent = section.title;
-    sec.appendChild(titleEl);
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML =
+      '<div class="section-title">' + section.title + '</div>' +
+      '<div class="section-all-btns">' +
+      '<span class="section-all-label">All:</span>' +
+      '<button id="all-yes-' + si + '" onclick="setAllInSection(' + si + ',\'Yes\')">Yes</button>' +
+      '<button id="all-no-' + si + '" onclick="setAllInSection(' + si + ',\'No\')">No</button>' +
+      '</div>';
+    sec.appendChild(header);
+
     section.questions.forEach(q => {
       const row = document.createElement('div');
       row.className = 'question' + (q.sub ? ' sub' : '');
